@@ -485,14 +485,19 @@ async def setup_command_error(ctx, error):
     raise error
 
 
-token = (os.getenv("TOKEN") or "").strip()
+def run_bot() -> None:
+    token = (os.getenv("TOKEN") or "").strip()
 
-if not token:
-    raise RuntimeError("Missing TOKEN in .env")
+    if not token:
+        raise RuntimeError("Missing TOKEN in .env")
 
-try:
-    client.run(token)
-except discord.LoginFailure as error:
-    raise RuntimeError(
-        "Discord login failed. Check your bot token in .env and reset it in the Discord Developer Portal if needed."
-    ) from error
+    try:
+        client.run(token)
+    except discord.LoginFailure as error:
+        raise RuntimeError(
+            "Discord login failed. Check your bot token in .env and reset it in the Discord Developer Portal if needed."
+        ) from error
+
+
+if __name__ == "__main__":
+    run_bot()
