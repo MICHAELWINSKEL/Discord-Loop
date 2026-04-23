@@ -120,21 +120,31 @@ def get_timer_entries(user_id: int) -> list[TimerEntry]:
     return sorted(bucket.values(), key=lambda entry: entry.deadline)
 
 
+def get_all_timer_entries() -> list[TimerEntry]:
+    entries: list[TimerEntry] = []
+    for bucket in user_timers.values():
+        entries.extend(bucket.values())
+
+    return sorted(entries, key=lambda entry: entry.deadline)
+
+
 def get_remaining_seconds(entry: TimerEntry) -> int:
     return max(0, int(entry.deadline - asyncio.get_running_loop().time()))
 
 
 def build_timer_list_embed(user: discord.abc.User) -> discord.Embed:
-    entries = get_timer_entries(user.id)
+    entries = get_all_timer_entries()
 
     if not entries:
-        return build_embed("Timer Status", f"{user.mention} ไม่มีตัวจับเวลาที่กำลังทำงานอยู่")
+        return build_embed("Timer Status", "ยังไม่มีตัวจับเวลาที่กำลังทำงานอยู่")
 
     lines = []
     for index, entry in enumerate(entries, start=1):
         remaining = format_duration(get_remaining_seconds(entry))
         total = format_duration(entry.duration_seconds)
-        lines.append(f"{index}. `{entry.name}` | เหลือ {remaining} | ตั้งไว้ {total}")
+        lines.append(
+            f"{index}. `{entry.name}` | โดย {entry.owner_mention} | เหลือ {remaining} | ตั้งไว้ {total}"
+        )
 
     return build_embed("Timer Status", "\n".join(lines))
 
